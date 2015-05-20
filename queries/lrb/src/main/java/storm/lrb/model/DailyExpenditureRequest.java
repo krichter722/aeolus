@@ -27,15 +27,15 @@ import storm.lrb.tools.StopWatch;
 
 
 /**
- * object to represent time travel requests
+ * Object to represent daily expnditure requests
  * 
- * LRB format: (Type = 4, Time, VID, XWay, QID, S init , S end , DOW, TOD)
+ * LRB format: (Type = 3, Time, VID, XWay, QID, Day)
  */
 /*
  * internal implementation notes: - does not implement clone because Values doesn't
  */
 @SuppressWarnings("CloneableImplementsClone")
-public class TravelTimeRequest extends LRBtuple implements Serializable {
+public class DailyExpenditureRequest extends LRBtuple implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -43,56 +43,59 @@ public class TravelTimeRequest extends LRBtuple implements Serializable {
 	private int vehicleIdentifier;
 	private int xWay;
 	private int queryIdentifier;
-	private int sinit;
-	private int send;
-	private int dayOfWeek;
-	private int minuteOfDay;
+	/**
+	 * day (1 is yesterday, 69 is 10 weeks ago)
+	 */
+	private Integer day;
 	
-	protected TravelTimeRequest() {
+	protected DailyExpenditureRequest() {
 		super();
 	}
 	
-	public TravelTimeRequest(int time, int vehicleIdentifier, int xWay, int queryIdentifier, int sinit, int send,
-		int dayOfWeek, int minuteOfDay, StopWatch systemTimer) {
-		super(LRBtuple.TYPE_TRAVEL_TIME_REQUEST, System.currentTimeMillis(), systemTimer);
+	public DailyExpenditureRequest(int time, int vehicleIdentifier, int xWay, int queryIdentifier, int day,
+		StopWatch systemTimer) {
+		super(LRBtuple.TYPE_DAILY_EXPEDITURE, System.currentTimeMillis(), systemTimer);
 		this.time = time;
 		this.vehicleIdentifier = vehicleIdentifier;
 		this.xWay = xWay;
 		this.queryIdentifier = queryIdentifier;
-		this.sinit = sinit;
-		this.send = send;
-		this.dayOfWeek = dayOfWeek;
-		this.minuteOfDay = minuteOfDay;
+		this.day = day;
 	}
 	
-	public int getMinuteOfDay() {
-		return minuteOfDay;
+	public void setDay(int day) {
+		this.day = day;
 	}
 	
-	public int getDayOfWeek() {
-		return dayOfWeek;
+	public int getDay() {
+		return day;
 	}
 	
-	@Override
-	public Integer getSend() {
-		return super.getSend(); // To change body of generated methods, choose Tools | Templates.
-	}
-	
-	@Override
-	public Integer getSinit() {
-		return super.getSinit(); // To change body of generated methods, choose Tools | Templates.
+	public void setQueryIdentifier(int queryIdentifier) {
+		this.queryIdentifier = queryIdentifier;
 	}
 	
 	public int getQueryIdentifier() {
 		return queryIdentifier;
 	}
 	
+	public void setxWay(int xWay) {
+		this.xWay = xWay;
+	}
+	
 	public int getxWay() {
 		return xWay;
 	}
 	
+	public void setVehicleIdentifier(int vehicleIdentifier) {
+		this.vehicleIdentifier = vehicleIdentifier;
+	}
+	
 	public int getVehicleIdentifier() {
 		return vehicleIdentifier;
+	}
+	
+	public void setTime(int time) {
+		this.time = time;
 	}
 	
 	public int getTime() {

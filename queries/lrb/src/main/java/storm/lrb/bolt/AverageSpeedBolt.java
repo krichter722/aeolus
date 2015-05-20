@@ -43,7 +43,8 @@ import backtype.storm.tuple.Values;
 
 /**
  * This bolt computes the average speed of a vehicle in a given segment and direction and emits these every minute.
- * 
+ * Therefore it reads {@link PosReport}s and emits (xWay, segmentIdentifier, direction, carCount, averageSpeed, minute)
+ * on {@link TopologyControl#LAST_AVERAGE_SPEED_STREAM_ID}.
  */
 public class AverageSpeedBolt extends BaseRichBolt {
 	
@@ -53,7 +54,7 @@ public class AverageSpeedBolt extends BaseRichBolt {
 	/**
 	 * contains the time of the last reports of each segment (xsd, timeinsec)
 	 */
-	private final Map<SegmentIdentifier, Integer> timeOfLastReportsMap;
+	private final Map<SegmentIdentifier, Long> timeOfLastReportsMap;
 	/**
 	 * contains all avgs of each vehicle driving in the given segment for the current minute. gets resetted every minute
 	 * (xsd -> Map(minute ->avgsvehiclespeeds))
@@ -65,12 +66,12 @@ public class AverageSpeedBolt extends BaseRichBolt {
 	// vehicles
 	// speeds>
 	
-	private volatile Integer lastEmitMinute = 0;
+	private volatile long lastEmitMinute = 0;
 	private OutputCollector collector;
 	private int processed_xway = -1;
 	
 	public AverageSpeedBolt(int xway) {
-		this.timeOfLastReportsMap = new HashMap<SegmentIdentifier, Integer>();
+		this.timeOfLastReportsMap = new HashMap<SegmentIdentifier, Long>();
 		this.avgSpeedsMap = new HashMap<SegmentIdentifier, AvgVehicleSpeeds>();
 		this.processed_xway = xway;
 	}
@@ -89,7 +90,7 @@ public class AverageSpeedBolt extends BaseRichBolt {
 		SegmentIdentifier accidentIdentifier = new SegmentIdentifier(pos.getSegmentIdentifier().getxWay(), pos
 			.getSegmentIdentifier().getSegment(), pos.getSegmentIdentifier().getDirection());
 		
-		int curminute = Time.getMinute(pos.getTime());
+		long curminute = Time.getMinute(pos.getTime());
 		
 		// synchronized (lastEmitMinute) {
 		// if a new minute starts emit all previous accumulated avgs
@@ -100,7 +101,7 @@ public class AverageSpeedBolt extends BaseRichBolt {
 		}
 		// }
 		
-		Integer timeOfLastReports = this.timeOfLastReportsMap.get(accidentIdentifier);
+		Long timeOfLastReports = this.timeOfLastReportsMap.get(accidentIdentifier);
 		if(timeOfLastReports == null) {
 			timeOfLastReports = curminute;
 			this.timeOfLastReportsMap.put(accidentIdentifier, timeOfLastReports);
@@ -120,16 +121,16 @@ public class AverageSpeedBolt extends BaseRichBolt {
 		this.collector.ack(tuple);
 	}
 	
-	private void emitAllAndRemove(int minute) {
+	private void emitAllAndRemove(long minute) {
 		
 		Set<SegmentIdentifier> segmentList = this.avgSpeedsMap.keySet();
 		
-		for(SegmentIdentifier xsd : segmentList) {
-			AvgVehicleSpeeds lastSpeeds = this.avgSpeedsMap.get(xsd);
+		for(SegmentIdentifier segmentIdentifier : segmentList) {
+			AvgVehicleSpeeds lastSpeeds = this.avgSpeedsMap.get(segmentIdentifier);
 			if(lastSpeeds != null) {
-				this.collector.emit(TopologyControl.LAST_AVERAGE_SPEED_STREAM_ID, new Values(this.processed_xway, xsd,
-					lastSpeeds.vehicleCount(), lastSpeeds.speedAverage(), minute));
-				this.avgSpeedsMap.put(xsd, new AvgVehicleSpeeds());
+				this.collector.emit(TopologyControl.LAST_AVERAGE_SPEED_STREAM_ID, new Values(this.processed_xway,
+					segmentIdentifier, lastSpeeds.vehicleCount(), lastSpeeds.speedAverage(), minute));
+				this.avgSpeedsMap.put(segmentIdentifier, new AvgVehicleSpeeds());
 			}
 			
 		}
@@ -151,9 +152,8 @@ public class AverageSpeedBolt extends BaseRichBolt {
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declareStream(TopologyControl.LAST_AVERAGE_SPEED_STREAM_ID, new Fields(
-			TopologyControl.XWAY_FIELD_NAME, TopologyControl.SEGMENT_FIELD_NAME, TopologyControl.DIRECTION_FIELD_NAME,
-			TopologyControl.CAR_COUNT_FIELD_NAME, TopologyControl.AVERAGE_SPEED_FIELD_NAME,
-			TopologyControl.MINUTE_FIELD_NAME));
+			TopologyControl.XWAY_FIELD_NAME, TopologyControl.SEGMENT_FIELD_NAME, TopologyControl.CAR_COUNT_FIELD_NAME,
+			TopologyControl.AVERAGE_SPEED_FIELD_NAME, TopologyControl.MINUTE_FIELD_NAME));
 	}
 	
 }

@@ -81,10 +81,7 @@ public class LRBTopology {
 		// builder.setBolt("lavBolt", new SegmentStatsBolt(0), cmd.xways*3)
 		// .fieldsGrouping("SplitStreamBolt", "PosReports", new Fields("xsd"));
 		builder
-			.setBolt(
-				TopologyControl.TOLL_NOTIFICATION_BOLT_NAME,
-				new TollNotificationBolt(stormTimer, TopologyControl.TOLL_NOTIFICATION_STREAM_ID,
-					TopologyControl.TOLL_ASSESSMENT_STREAM_ID), executors)
+			.setBolt(TopologyControl.TOLL_NOTIFICATION_BOLT_NAME, new TollNotificationBolt(stormTimer), executors)
 			.setNumTasks(tasks)
 			.fieldsGrouping(TopologyControl.LAST_AVERAGE_SPEED_BOLT_NAME, TopologyControl.LAST_AVERAGE_SPEED_STREAM_ID,
 				new Fields(fields))
@@ -134,8 +131,8 @@ public class LRBTopology {
 		
 		this.stormConfig = new Config();
 		this.stormConfig.registerSerialization(storm.lrb.model.PosReport.class);
-		this.stormConfig.registerSerialization(storm.lrb.model.AccBalRequest.class);
-		this.stormConfig.registerSerialization(storm.lrb.model.DaiExpRequest.class);
+		this.stormConfig.registerSerialization(storm.lrb.model.AccountBalanceRequest.class);
+		this.stormConfig.registerSerialization(storm.lrb.model.DailyExpenditureRequest.class);
 		this.stormConfig.registerSerialization(storm.lrb.model.TravelTimeRequest.class);
 		this.stormConfig.registerSerialization(storm.lrb.model.Accident.class);
 		this.stormConfig.registerSerialization(storm.lrb.model.VehicleInfo.class);

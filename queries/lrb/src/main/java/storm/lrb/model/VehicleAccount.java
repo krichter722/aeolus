@@ -30,7 +30,7 @@ import java.io.Serializable;
 public class VehicleAccount implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private Integer vid = 0;
+	private Integer vehicleIdentifier = 0;
 	private int tollToday = 0;
 	private Long tollTime = 0L;
 	
@@ -39,28 +39,24 @@ public class VehicleAccount implements Serializable {
 	
 	protected VehicleAccount() {}
 	
-	public VehicleAccount(Integer vid, Integer xWay) {
-		this.vid = vid;
+	public VehicleAccount(Integer vehicleIdentifier, Integer xWay) {
+		this.vehicleIdentifier = vehicleIdentifier;
 		this.xWay = xWay;
 		// TODO checken ob er an einem tag nur ein xway belegen kann, evtl auch rausnehmen
 	}
 	
 	public VehicleAccount(int calculatedToll, PosReport pos) {
-		this.vid = pos.getVehicleIdentifier();
+		if(pos.getTimer() == null) {
+			throw new IllegalArgumentException("storm timer of the position timer is null");
+		}
+		this.vehicleIdentifier = pos.getVehicleIdentifier();
 		this.xWay = pos.getSegmentIdentifier().getxWay();
 		
-		this.assessToll(calculatedToll, pos.getEmitTime());
+		this.assessToll(calculatedToll, pos.getTimer().getOffset());
 	}
 	
-	public VehicleAccount(AccBalRequest bal) {
-		this.vid = bal.getVehicleIdentifier();
-		this.xWay = bal.getSegmentIdentifier().getxWay();
-	}
-	
-	@Override
-	public String toString() {
-		return "VehicleAccount [vid=" + this.vid + ", tollToday=" + this.tollToday + ", tollTime=" + this.tollTime
-			+ ", day=" + this.day + ", xWay=" + this.xWay + "]";
+	public VehicleAccount(AccountBalanceRequest bal) {
+		this.vehicleIdentifier = bal.getVehicleIdentifier();
 	}
 	
 	/**
@@ -79,14 +75,13 @@ public class VehicleAccount implements Serializable {
 		
 	}
 	
-	public String getAccBalanceNotification(AccBalRequest accBalReq) {
+	public AccountBalance getAccBalanceNotification(AccountBalanceRequest accBalReq) {
 		// TODO nach zweiter meinung fragen: Benchmarkspezifikation
 		// widerspricht sich bei der Reihenfolge der Werte des Outputtuples.
 		
-		String notification = "2," + accBalReq.getTime() + "," + accBalReq.getEmitTime() + ","
-			+ accBalReq.getQueryIdentifier() + "," + this.tollTime / 1000 + "," + this.tollToday + "***"
-			+ accBalReq.getTime() + "," + accBalReq.getProcessingTime() + "###" + this.toString() + "###";
-		return notification;
+		AccountBalance retValue = new AccountBalance(accBalReq.getTime(), accBalReq.getQueryIdentifier(),
+			this.tollToday, this.tollTime, accBalReq.getCreated(), accBalReq.getTimer());
+		return retValue;
 	}
 	
 }
