@@ -67,7 +67,7 @@ public class LRBTopology {
 			.shuffleGrouping(TopologyControl.START_SPOUT_NAME, TopologyControl.SPOUT_STREAM_ID);// .allGrouping("Spout",
 																								// "stormtimer");
 		
-		builder.setBolt(TopologyControl.AVERAGE_SPEED_BOLT_NAME, new AverageSpeedBolt(xways), xways * 3)
+		builder.setBolt(TopologyControl.AVERAGE_SPEED_BOLT_NAME, new AverageSpeedBolt(), xways * 3)
 			.fieldsGrouping(
 				TopologyControl.SPLIT_STREAM_BOLT_NAME,
 				TopologyControl.POS_REPORTS_STREAM_ID,
@@ -98,7 +98,7 @@ public class LRBTopology {
 			new FileWriterBolt(topologyNamePrefix + "_toll", xways * 8, local), 1).allGrouping(
 			TopologyControl.TOLL_NOTIFICATION_BOLT_NAME, TopologyControl.TOLL_NOTIFICATION_STREAM_ID);
 		
-		builder.setBolt(TopologyControl.ACCIDENT_DETECTION_BOLT_NAME, new AccidentDetectionBolt(0), xways)
+		builder.setBolt(TopologyControl.ACCIDENT_DETECTION_BOLT_NAME, new AccidentDetectionBolt(), xways)
 			.fieldsGrouping(TopologyControl.SPLIT_STREAM_BOLT_NAME, TopologyControl.POS_REPORTS_STREAM_ID,
 				new Fields(TopologyControl.XWAY_FIELD_NAME, TopologyControl.DIRECTION_FIELD_NAME));
 		
