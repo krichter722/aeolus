@@ -15,4 +15,7 @@ Due to fact that `storm` is an irreplacable dependency and that it's based on Ja
 
 This prevents you from using Hibernate > 4.3 which might be interesting for implementation of storage backends for historical quieries (see documentation of the `TollDataStore` interface for details).
 
+## Logging
+We're using `logback` (in the form of `logback-classic`). Contributions and submodules/-projects which aim to be included in the source tree ought to stick with that.
+
 [1]:https://github.com/mjsax/aeolus
