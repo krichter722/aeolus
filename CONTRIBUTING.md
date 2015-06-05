@@ -13,7 +13,7 @@ Some unit tests are based on random values. If you encounter a test failure, ple
 ## Java
 Due to fact that `storm` is an irreplacable dependency and that it's based on Java 6, we have to stick with it and can only upgrade as soon as `storm` builds with Java 7.
 
-This prevents you from using Hibernate > 4.3 which might be interesting for implementation of storage backends for historical quieries (see documentation of the `TollDataStore` interface for details).
+This prevents you from using Hibernate > 4.3 and eclipselink which might be interesting for implementation of storage backends for historical quieries (see documentation of the `TollDataStore` interface for details). Hibernate and eclipselink require Java 7 and both fail with error `java.lang.UnsupportedClassVersionError: org/eclipse/persistence/jpa/PersistenceProvider : Unsupported major.minor version 51.0` during initialization. OpenJPA is incompatible with Java 7 (as stated in [their build instructions](http://openjpa.apache.org/building.html#Building-CommandLineBuilds))
 
 ## Logging
 We're using `logback` (in the form of `logback-classic`). Contributions and submodules/-projects which aim to be included in the source tree ought to stick with that.
